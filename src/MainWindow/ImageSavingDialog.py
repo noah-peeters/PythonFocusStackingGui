@@ -113,19 +113,26 @@ def createDialog(imageArray, imType, chosenPath):
     errorStackTrace = None
 
     compressionFactor = None
-    if imType == "JPG" or imType == "PNG":
+    if imType in ["JPG", "PNG"]:
+        # Convert float32 image to uint8 for JPG and PNG:
+        imageArray = np.around(imageArray)
+        imageArray[imageArray > 255] = 255
+        imageArray[imageArray < 0] = 0
+        imageArray = imageArray.astype(np.uint8)
+
         qualityDialog = SelectQualityDialog(imType)
         qualityDialog.exec()
         if qualityDialog.selectedQuality != None:
             compressionFactor = qualityDialog.selectedQuality
         else:
             return
-
-    # Convert float32 image to uint8
-    imageArray = np.around(imageArray)
-    imageArray[imageArray > 255] = 255
-    imageArray[imageArray < 0] = 0
-    imageArray = imageArray.astype(np.uint8)
+    elif imType == "TIFF":
+        # Convert float32 image to uint16 for TIFF:
+        imageArray *= (2.0**8 ) # scale to 16bit dynamic range
+        imageArray = np.around(imageArray)
+        imageArray[imageArray > 65535] = 65535
+        imageArray[imageArray < 0] = 0
+        imageArray = imageArray.astype(np.uint16)
 
     # Get compression/quality for JPG and PNG (don't compress tiff)
     compression_list = None

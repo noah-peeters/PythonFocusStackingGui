@@ -4,7 +4,7 @@ Create dialog(s) for changing image export settings; and success/error message.
 import os
 import PySide6.QtCore as qtc
 import PySide6.QtWidgets as qtw
-from ..utilities import save_image
+from src.utilities import save_image
 
 # Quality selection dialog (depends on type of exported img)
 class SelectQualityDialog(qtw.QDialog):

@@ -2,11 +2,9 @@
 Create dialog(s) for changing image export settings; and success/error message.
 """
 import os
-import cv2
-import numpy as np
 import PySide6.QtCore as qtc
 import PySide6.QtWidgets as qtw
-
+from src.utilities import save_image
 
 # Quality selection dialog (depends on type of exported img)
 class SelectQualityDialog(qtw.QDialog):
@@ -104,13 +102,10 @@ class ResultDialog(qtw.QMessageBox):
             self.setInformativeText("File location:\n" + imgPath)
 
 
-def createDialog(imageArray, imType, chosenPath):
+def createDialog(imageArray, imType, imgPath):
     # Something went wrong
     if imType == None:
         return
-
-    imgPath = None
-    errorStackTrace = None
 
     compressionFactor = None
     if imType == "JPG" or imType == "PNG":
@@ -121,26 +116,6 @@ def createDialog(imageArray, imType, chosenPath):
         else:
             return
 
-    # Convert float32 image to uint8
-    imageArray = np.around(imageArray)
-    imageArray[imageArray > 255] = 255
-    imageArray[imageArray < 0] = 0
-    imageArray = imageArray.astype(np.uint8)
-
-    # Get compression/quality for JPG and PNG (don't compress tiff)
-    compression_list = None
-    if imType == "JPG":
-        # 0->100 quality (JPG)
-        compression_list = [cv2.IMWRITE_JPEG_QUALITY, compressionFactor]
-    elif imType == "PNG":
-        # 9->0 compression (PNG)
-        compression_list = [cv2.IMWRITE_PNG_COMPRESSION, compressionFactor]
-
-    # Try saving image to disk
-    try:
-        cv2.imwrite(chosenPath, imageArray, compression_list)
-        imgPath = chosenPath
-    except Exception as e:
-        errorStackTrace = e
+    errorStackTrace = save_image(imageArray, imType, imgPath, compressionFactor)
 
     ResultDialog(imgPath, errorStackTrace).exec()

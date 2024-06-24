@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(
                     description='Command line interface to chimpstackr',
                     epilog='Contributed by Ivo Blöchliger')
 
-parser.add_argument('-o', '--output', default="stacked.jpg", help="Name of the outputfile, must end in .jpg (or .JPG). Defaults to stacked.jpg.")
+parser.add_argument('-o', '--output', default="stacked.jpg", help="Name of the outputfile, must have a meaningful extension (like .jpg, .png, .tiff). Defaults to stacked.jpg.")
 parser.add_argument('-f', '--overwrite', action='store_true', help="Forces to overwrite an existing output file.")
 parser.add_argument('files', metavar='inputfile', type=str, nargs='+', help="List of input files to be stacked.")
 parser.add_argument('-q', '--quality', type=int, default=95, help="JPG quality factor, defaults to 95.")
@@ -28,10 +28,6 @@ for input in inputs:
     if not os.path.exists(input):
         print(f"File {input} not found!")
         exit(-1)
-
-if not output[-4:].upper()==".JPG":
-    print("Output file must end in .jpg (or .JPG)")
-    exit(-1)
 
 if not overwrite and os.path.exists(output):
     print(f"Output file {output} already exists, aborting. Consider using the -f flag to force overwriting existing files.")
@@ -93,5 +89,9 @@ if not overwrite and os.path.exists(output):
             print(f"WARNING: output file existed, renamed current output to {output}.")
             break
         i+=1
-cv2.imwrite(output, imageArray, [cv2.IMWRITE_JPEG_QUALITY, quality])
+
+if output.upper().endswith(".JPG") or output.upper().endswith(".JPEG"):
+    cv2.imwrite(output, imageArray, [cv2.IMWRITE_JPEG_QUALITY, quality])
+else:
+    cv2.imwrite(output, imageArray)
 
